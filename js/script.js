@@ -1,15 +1,17 @@
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', main);
+
+function main() {
     var canvas = document.getElementById('canvas');
     var engine = new BABYLON.Engine(canvas, true);
     var character;
-    var charMoveSpeed = 0.1;
+    var charMoveSpeed = 0.03;
     
     var createScene = function() {
         var scene = new BABYLON.Scene(engine);
         var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 20,-15), scene);
         camera.setTarget(BABYLON.Vector3.Zero());
         var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
-        character = BABYLON.Mesh.CreateSphere('sphere1', 16, 1, scene);
+        character = BABYLON.Mesh.CreateSphere('sphere1', 16, 0.7, scene);
         character.position.y = 1;
         var ground = BABYLON.Mesh.CreateGround('ground1', 25, 18, 2, scene);
     
@@ -56,7 +58,7 @@ window.addEventListener('DOMContentLoaded', function() {
         if (event.keyCode == 87 || event.keyCode == 38) {
             keys.up = false;  
         }
-        if (event.keyCode == 83 || event.keyCode == 40) {  
+        if (event.keyCode == 83 || event.keyCode == 40) {
             keys.down = false;
         } 
     }
@@ -79,4 +81,5 @@ window.addEventListener('DOMContentLoaded', function() {
             character.position.z -= tempMoveSpeed;
         }
     });
-});
+}
+    
