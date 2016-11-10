@@ -1,14 +1,12 @@
 window.addEventListener('DOMContentLoaded', main);
 
 var keys = { letft:false, right:false, up:false, down:false };
-var engine, scene, character;
+var engine, scene, light, character;
 var charMoveSpeed = 0.1;
 
 
 function main(){
-    var engine_and_scene = createScene();
-    engine = engine_and_scene[0];
-    scene = engine_and_scene[1];
+    createScene();
     
     engine.runRenderLoop(function() {
         scene.render();
@@ -20,21 +18,24 @@ function main(){
     window.addEventListener("keyup", function() { key_up_or_down(event, false); });
     
     engine.runRenderLoop(updatePosition);
+    
+    // ob kliku na character se celotna scena v 1000 ms obarva zeleno
+    character.actionManager = new BABYLON.ActionManager(scene);
+	character.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickTrigger, light, "diffuse", BABYLON.Color3.Green(), 1000))
+
 }
 
 
 function createScene() {
     var canvas = document.getElementById('canvas');
-    var engine = new BABYLON.Engine(canvas, true); 
-    var scene = new BABYLON.Scene(engine);
+    engine = new BABYLON.Engine(canvas, true); 
+    scene = new BABYLON.Scene(engine);
     var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 20,-15), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
-    var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
+    light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
     character = BABYLON.Mesh.CreateSphere('sphere1', 16, 1, scene);
     character.position.y = 1;
     var ground = BABYLON.Mesh.CreateGround('ground1', 25, 18, 2, scene);
-
-    return [engine, scene];
 }
 
 
