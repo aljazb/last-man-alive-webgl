@@ -1,85 +1,75 @@
 window.addEventListener('DOMContentLoaded', main);
 
-function main() {
-    var canvas = document.getElementById('canvas');
-    var engine = new BABYLON.Engine(canvas, true);
-    var character;
-    var charMoveSpeed = 0.03;
-    
-    var createScene = function() {
-        var scene = new BABYLON.Scene(engine);
-        var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 20,-15), scene);
-        camera.setTarget(BABYLON.Vector3.Zero());
-        var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
-        character = BABYLON.Mesh.CreateSphere('sphere1', 16, 0.7, scene);
-        character.position.y = 1;
-        var ground = BABYLON.Mesh.CreateGround('ground1', 25, 18, 2, scene);
-    
-        return scene;
-    }
-    
-    var scene = createScene();
+var keys = { letft:false, right:false, up:false, down:false };
+var engine, scene, light, character;
+var charMoveSpeed = 0.1;
+
+
+function main(){
+    createScene();
     
     engine.runRenderLoop(function() {
         scene.render();
     });
 
-    window.addEventListener('resize', function() {
-        engine.resize();
-    });
+    window.addEventListener('resize', function() { engine.resize(); });
     
-    var keys = { letft:false, right:false, up:false, down:false };
+    window.addEventListener("keydown", function() { key_up_or_down(event, true); });
+    window.addEventListener("keyup", function() { key_up_or_down(event, false); });
     
-    window.addEventListener("keydown", onKeyDown, false);
-    window.addEventListener("keyup", onKeyUp, false);
+    engine.runRenderLoop(updatePosition);
     
-    function onKeyDown(event) {    
-        if (event.keyCode == 65 || event.keyCode == 37) {  
-            keys.left = true;
-        }
-        if (event.keyCode == 68 || event.keyCode == 39) { 
-            keys.right = true;    
-        }
-        if (event.keyCode == 87 || event.keyCode == 38) {
-            keys.up = true;  
-        }
-        if (event.keyCode == 83 || event.keyCode == 40) { 
-            keys.down = true;
-        } 
-    }
-    
-    function onKeyUp(event) {  
-        if (event.keyCode == 65 || event.keyCode == 37) { 
-            keys.left = false;
-        }
-        if (event.keyCode == 68 || event.keyCode == 39) {
-            keys.right = false;    
-        }
-        if (event.keyCode == 87 || event.keyCode == 38) {
-            keys.up = false;  
-        }
-        if (event.keyCode == 83 || event.keyCode == 40) {
-            keys.down = false;
-        } 
-    }
-    
-    engine.runRenderLoop(function () {   
-        var tempMoveSpeed = charMoveSpeed;
-        if ((keys.left || keys.right) && (keys.up || keys.down)) {
-            tempMoveSpeed /= 1.5;
-        }
-        if (keys.left) {
-            character.position.x -= tempMoveSpeed;
-        }
-        if (keys.right) {
-            character.position.x += tempMoveSpeed;
-        }
-        if (keys.up) {
-            character.position.z += tempMoveSpeed;
-        }
-        if (keys.down) {
-            character.position.z -= tempMoveSpeed;
-        }
-    });
+    // ob kliku na character se celotna scena v 1000 ms obarva zeleno
+    character.actionManager = new BABYLON.ActionManager(scene);
+	character.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickTrigger, light, "diffuse", BABYLON.Color3.Green(), 1000))
+
 }
-    
+
+
+function createScene() {
+    var canvas = document.getElementById('canvas');
+    engine = new BABYLON.Engine(canvas, true); 
+    scene = new BABYLON.Scene(engine);
+    var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 20,-15), scene);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
+    character = BABYLON.Mesh.CreateSphere('sphere1', 16, 1, scene);
+    character.position.y = 1;
+    var ground = BABYLON.Mesh.CreateGround('ground1', 25, 18, 2, scene);
+}
+
+
+function updatePosition() {
+    var tempMoveSpeed = charMoveSpeed;
+    if ((keys.left || keys.right) && (keys.up || keys.down)) {
+        tempMoveSpeed /= 1.5;
+    }
+    if (keys.left) {
+        character.position.x -= tempMoveSpeed;
+    }
+    if (keys.right) {
+        character.position.x += tempMoveSpeed;
+    }
+    if (keys.up) {
+        character.position.z += tempMoveSpeed;
+    }
+    if (keys.down) {
+        character.position.z -= tempMoveSpeed;
+    }
+}
+
+
+function key_up_or_down(event, bool_value) {
+    if (event.keyCode == 65 || event.keyCode == 37) {  
+        keys.left = bool_value;
+    }
+    if (event.keyCode == 68 || event.keyCode == 39) { 
+        keys.right = bool_value;    
+    }
+    if (event.keyCode == 87 || event.keyCode == 38) {
+        keys.up = bool_value;  
+    }
+    if (event.keyCode == 83 || event.keyCode == 40) { 
+        keys.down = bool_value;
+    } 
+}
