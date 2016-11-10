@@ -17,6 +17,7 @@ function main(){
     window.addEventListener("keydown", function() { key_up_or_down(event, true); });
     window.addEventListener("keyup", function() { key_up_or_down(event, false); });
     
+    window.addEventListener("click", mouseClick);
     engine.runRenderLoop(updatePosition);
     
     // ob kliku na character se celotna scena v 1000 ms obarva zeleno
@@ -25,6 +26,14 @@ function main(){
 
 }
 
+function mouseClick() {
+    var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+    if (pickResult.hit) {
+        var square  = BABYLON.Mesh.CreateSphere('square', 16, 1, scene);
+        square.position.x = pickResult.pickedPoint.x;
+        square.position.z = pickResult.pickedPoint.z;
+    }
+}
 
 function createScene() {
     var canvas = document.getElementById('canvas');
@@ -33,8 +42,8 @@ function createScene() {
     var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 20,-15), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
     light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
-    character = BABYLON.Mesh.CreateSphere('sphere1', 16, 1, scene);
-    character.position.y = 1;
+    character = BABYLON.MeshBuilder.CreateCylinder("cone", {diameterTop: 0, tessellation: 4}, scene);
+    character.position.y = 3;
     var ground = BABYLON.Mesh.CreateGround('ground1', 25, 18, 2, scene);
 }
 
