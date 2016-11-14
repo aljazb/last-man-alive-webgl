@@ -54,10 +54,11 @@ function mouseClick() {
         materialZombie.diffuseColor = new BABYLON.Color3(0.0, 0.0, 0.0);
         
         var zombie  = BABYLON.Mesh.CreateSphere('zombie', 0, 0.5, scene);
+        zombie.checkCollisions = true;
         zombie.material = materialZombie;
         zombie.position.x = x;
         zombie.position.z = z;
-        
+        zombie.position.y = 0.5;
         zombies.push(zombie);
     }
 }
@@ -76,6 +77,9 @@ function updateZombies() {
         var norm_vector = vector.normalize();
         zombies[i].position.x += norm_vector.x * zombieMoveSpeed;
         zombies[i].position.z += norm_vector.y * zombieMoveSpeed;
+        if (zombies[i].intersectsMesh(character, false)) {
+            zombies[i].material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+        }
     }
 }
 
@@ -122,7 +126,23 @@ function updateBullets() {
         var direction_z = vector_direction[bullets[i].direction][1];
         var norm_vector = new BABYLON.Vector2(direction_x, direction_z).normalize();
         bullets[i].position.x += norm_vector.x * bulletMoveSpeed;
-        bullets[i].position.z += norm_vector.y * bulletMoveSpeed; 
+        bullets[i].position.z += norm_vector.y * bulletMoveSpeed;
+        if (Math.abs(bullets[i].position.x) > 60 || Math.abs(bullets[i].position.z) > 60) {
+            bullets.splice(i, 1);
+            i--;
+            continue;
+        }
+        for (var j = 0; j < zombies.length; j++) {
+            if (bullets[i].intersectsMesh(zombies[j], false)) {
+                zombies[j].dispose();
+                bullets[i].dispose();
+                zombies.splice(j, 1);
+                bullets.splice(i, 1);
+                i--;
+                console.log("BUM");
+                break;
+            }
+        }
     }
 }
 
@@ -143,6 +163,7 @@ function makeBullet() {
         
         bullet.position.x = character_x;
         bullet.position.z = character_z;
+        bullet.position.y = 0.5;
         bullet.direction = direction;
         
         bullets.push(bullet);
@@ -171,6 +192,7 @@ function createScene() {
     var canvas = document.getElementById('canvas');
     engine = new BABYLON.Engine(canvas, true); 
     scene = new BABYLON.Scene(engine);
+    scene.collisionsEnabled = true;
     
     var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 30,-15), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
@@ -185,7 +207,7 @@ function createScene() {
     character.rotation.x = deg2rad(90);
     
     var materialGround = new BABYLON.StandardMaterial("texture1", scene);
-    materialGround.diffuseTexture = new BABYLON.Texture("../textures/graveyard.jpg", scene);
+    materialGround.diffuseTexture = new BABYLON.Texture("../textures/graveyard_grass.jpg", scene);
     ground = BABYLON.Mesh.CreateGround('ground1', groundX, groundZ, 2, scene);
     ground.material = materialGround;
 }
