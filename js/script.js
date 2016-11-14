@@ -85,6 +85,8 @@ function updateZombies() {
 
 function updateCharacter() {
     var tempMoveSpeed = charMoveSpeed;
+    var wallOffset = 1;
+    
     if ((keys.left || keys.right) && (keys.up || keys.down)) {
         tempMoveSpeed /= 1.5;
     }
@@ -92,10 +94,16 @@ function updateCharacter() {
     if (keys.left) {
         direction = 6;
         character.position.x -= tempMoveSpeed;
+        if (character.position.x < -groundX/2 + wallOffset) {
+            character.position.x = -groundX/2 + wallOffset;
+        }
     } 
     else if (keys.right) {
         direction = 2;
         character.position.x += tempMoveSpeed;
+        if (character.position.x > groundX/2 - wallOffset) {
+            character.position.x = groundX/2 - wallOffset;
+        }
     }
     
     if (keys.down) {
@@ -106,6 +114,9 @@ function updateCharacter() {
             direction = 3;
 
         character.position.z -= tempMoveSpeed;
+        if (character.position.z < -groundZ/2 + wallOffset) {
+            character.position.z = -groundZ/2 + wallOffset;
+        }
     } 
     else if (keys.up) {
         direction = 0;
@@ -115,7 +126,12 @@ function updateCharacter() {
             direction = 1;
 
         character.position.z += tempMoveSpeed;
+        if (character.position.z > groundZ/2 - wallOffset) {
+            character.position.z = groundZ/2 - wallOffset;
+        }
     }
+    
+    
     
     character.rotation.y = deg2rad(direction * 45);
 }
@@ -127,7 +143,7 @@ function updateBullets() {
         var norm_vector = new BABYLON.Vector2(direction_x, direction_z).normalize();
         bullets[i].position.x += norm_vector.x * bulletMoveSpeed;
         bullets[i].position.z += norm_vector.y * bulletMoveSpeed;
-        if (Math.abs(bullets[i].position.x) > 60 || Math.abs(bullets[i].position.z) > 60) {
+        if (Math.abs(bullets[i].position.x) > groundX/2 || Math.abs(bullets[i].position.z) > groundZ/2) {
             bullets.splice(i, 1);
             i--;
             continue;
@@ -205,11 +221,25 @@ function createScene() {
     character.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
     character.position.y = 0.5;
     character.rotation.x = deg2rad(90);
+    character.checkCollisions = true;
     
     var materialGround = new BABYLON.StandardMaterial("texture1", scene);
     materialGround.diffuseTexture = new BABYLON.Texture("../textures/graveyard_grass.jpg", scene);
     ground = BABYLON.Mesh.CreateGround('ground1', groundX, groundZ, 2, scene);
     ground.material = materialGround;
+    
+    var leftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    leftWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
+    leftWall.position = new BABYLON.Vector3(-groundX/2, 1, 0);
+    var rightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    rightWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
+    rightWall.position = new BABYLON.Vector3(groundX/2, 1, 0);
+    var topWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    topWall.scaling = new BABYLON.Vector3(groundX, 2, 1);
+    topWall.position = new BABYLON.Vector3(0, 1, groundZ/2);
+    var bottomWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    bottomWall.scaling = new BABYLON.Vector3(groundX, 2, 1);
+    bottomWall.position = new BABYLON.Vector3(0, 1, -groundZ/2);
 }
 
 function deg2rad(deg) {
