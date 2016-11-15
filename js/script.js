@@ -84,8 +84,8 @@ function updateZombies() {
             wait(1000);
             engine.stopRenderLoop();
             document.getElementById("canvas").style.display = 'none';
-            document.getElementsByClassName("win").style.display = 'none';
-            document.getElementsByClassName("gameover").style.display = 'block';
+            document.getElementById("win").style.display = 'none';
+            document.getElementById("gameover").style.display = 'block';
         }
     }
 }
@@ -168,8 +168,8 @@ function updateBullets() {
                 var body = document.getElementsByTagName('body')[0];
                 body.style.backgroundImage = 'url(textures/win_bg.png)';
                 document.getElementById("canvas").style.display = 'none';
-                document.getElementsByClassName("gameover").style.display = 'none';
-                document.getElementsByClassName("win").style.display = 'block';
+                document.getElementById("gameover").style.display = 'none';
+                document.getElementById("win").style.display = 'block';
                 
                 break;
             }

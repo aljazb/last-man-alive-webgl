@@ -16,7 +16,7 @@ canvas {
     /* display: none; */
 }
 
-.gameover {
+#gameover, #win {
     background-color: black;
     border: 3px solid white;
     border-radius: 10px;
@@ -29,15 +29,6 @@ canvas {
     transform: translateY(-50%);
 }
 
-.win {
-    background-color: black;
-    border: 3px solid white;
-    border-radius: 10px;
-    color: white;
-    text-align: center;
-    width: 70%;
-    margin: 0 auto;
-}
 
 button {
     border-radius: 5px;
