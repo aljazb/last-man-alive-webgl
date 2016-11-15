@@ -5,3 +5,65 @@ html, body, canvas {
     margin: 0px;
     overflow: hidden;
 }
+
+body {
+    background-image: url("textures/gameover_bg.png")
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    /* display: none; */
+}
+
+.gameover {
+    background-color: black;
+    border: 3px solid white;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    width: 70%;
+    margin: 0 auto;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.win {
+    background-color: black;
+    border: 3px solid white;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    width: 70%;
+    margin: 0 auto;
+}
+
+button {
+    border-radius: 5px;
+    color: white;
+    padding: 16px 32px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    margin: 15px 10px;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.restart, .restart_2 {
+    background-color: white;
+    color: black;
+    border: 2px solid white;
+}
+
+.restart:hover {
+    background-color: #b10909;
+    color: white;
+}
+
+.restart_2:hover {
+    background-color: #09a0c0;
+    color: white;
+}

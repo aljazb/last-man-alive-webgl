@@ -36,7 +36,7 @@ function main(){
     character.actionManager = new BABYLON.ActionManager(scene);
 	character.actionManager.registerAction(new BABYLON.InterpolateValueAction(
 	    BABYLON.ActionManager.OnPickTrigger, light, "diffuse", BABYLON.Color3.Green(), 1000))
-
+	    
 }
 
 function mouseClick() {
@@ -79,6 +79,13 @@ function updateZombies() {
         zombies[i].position.z += norm_vector.y * zombieMoveSpeed;
         if (zombies[i].intersectsMesh(character, false)) {
             zombies[i].material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+            
+            // show gameover screen
+            wait(1000);
+            engine.stopRenderLoop();
+            document.getElementById("canvas").style.display = 'none';
+            document.getElementsByClassName("win").style.display = 'none';
+            document.getElementsByClassName("gameover").style.display = 'block';
         }
     }
 }
@@ -155,7 +162,15 @@ function updateBullets() {
                 zombies.splice(j, 1);
                 bullets.splice(i, 1);
                 i--;
-                console.log("BUM");
+                
+                // show winning screen
+                engine.stopRenderLoop();
+                var body = document.getElementsByTagName('body')[0];
+                body.style.backgroundImage = 'url(textures/win_bg.png)';
+                document.getElementById("canvas").style.display = 'none';
+                document.getElementsByClassName("gameover").style.display = 'none';
+                document.getElementsByClassName("win").style.display = 'block';
+                
                 break;
             }
         }
@@ -240,6 +255,14 @@ function createScene() {
     var bottomWall = BABYLON.Mesh.CreateBox("box", 1, scene);
     bottomWall.scaling = new BABYLON.Vector3(groundX, 2, 1);
     bottomWall.position = new BABYLON.Vector3(0, 1, -groundZ/2);
+}
+
+function wait(ms){
+   var start = new Date().getTime();
+   var end = start;
+   while(end < start + ms) {
+     end = new Date().getTime();
+  }
 }
 
 function deg2rad(deg) {
