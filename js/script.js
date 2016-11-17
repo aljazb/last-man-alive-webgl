@@ -4,7 +4,7 @@ var keys = { left: false, right: false, up: false, down: false, fire: false };
 var vector_direction = { 0: [0,1], 1: [1,1], 2: [1,0], 3: [1,-1], 4: [0,-1], 5: [-1,-1], 6: [-1,0], 7: [-1,1]};
 var engine, scene, light, character, ground;
 var charMoveSpeed = 0.05;
-var zombieMoveSpeed = 0.01;
+var zombieMoveSpeed = 0.02;
 var bulletMoveSpeed = 0.2;
 var radius = 3;
 var direction = 0;
@@ -12,7 +12,8 @@ var zombies = [];
 var bullets = [];
 var groundX = 30;
 var groundZ = 25;
-var lastMFireTime = Date.now();
+var lastFireTime = Date.now();
+var lastZombieTime = Date.now();
 
 
 function main(){
@@ -49,7 +50,9 @@ function mouseClick() {
     
     var distance_from_character = Math.sqrt(Math.pow(Math.abs(x-character_x), 2) + Math.pow(Math.abs(z-character_z), 2));
     
-    if (pickResult.hit && distance_from_character > radius) {
+    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 1000) {
+        lastZombieTime = Date.now();
+        
         var materialZombie = new BABYLON.StandardMaterial("texture1", scene);
         materialZombie.diffuseColor = new BABYLON.Color3(0.0, 0.0, 0.0);
         
@@ -163,6 +166,7 @@ function updateBullets() {
                 bullets.splice(i, 1);
                 i--;
                 
+                /*
                 // show winning screen
                 engine.stopRenderLoop();
                 var body = document.getElementsByTagName('body')[0];
@@ -170,6 +174,7 @@ function updateBullets() {
                 document.getElementById("canvas").style.display = 'none';
                 document.getElementById("gameover").style.display = 'none';
                 document.getElementById("win").style.display = 'block';
+                */
                 
                 break;
             }
@@ -178,10 +183,10 @@ function updateBullets() {
 }
 
 function makeBullet() {
-    if (keys.fire && Date.now() - lastMFireTime > 500) {
+    if (keys.fire && Date.now() - lastFireTime > 500) {
         console.log(direction);
         
-        lastMFireTime = Date.now();
+        lastFireTime = Date.now();
         
         var character_x = character.position.x;
         var character_z = character.position.z;
