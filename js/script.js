@@ -162,24 +162,13 @@ function updateBullets() {
             continue;
         }
         if (bullets[i].intersectsMesh(holyDoor, false)) {
-                console.log("DELAAAA");
-                doorLife--;
-                bullets[i].dispose();
-                bullets.splice(i, 1);
-                i--;
-                if (doorLife <= 0) {
-                    holyDoor.dispose();
-                }
-            }
-        for (var j = 0; j < zombies.length; j++) {
-            if (bullets[i].intersectsMesh(zombies[j], false)) {
-                zombies[j].dispose();
-                bullets[i].dispose();
-                zombies.splice(j, 1);
-                bullets.splice(i, 1);
-                i--;
+            doorLife--;
+            bullets[i].dispose();
+            bullets.splice(i, 1);
+            i--;
+            if (doorLife <= 0) {
+                holyDoor.dispose();
                 
-                /*
                 // show winning screen
                 engine.stopRenderLoop();
                 var body = document.getElementsByTagName('body')[0];
@@ -187,8 +176,15 @@ function updateBullets() {
                 document.getElementById("canvas").style.display = 'none';
                 document.getElementById("gameover").style.display = 'none';
                 document.getElementById("win").style.display = 'block';
-                */
-                
+            }
+        }
+        for (var j = 0; j < zombies.length; j++) {
+            if (bullets[i].intersectsMesh(zombies[j], false)) {
+                zombies[j].dispose();
+                bullets[i].dispose();
+                zombies.splice(j, 1);
+                bullets.splice(i, 1);
+                i--;
                 break;
             }
         }
