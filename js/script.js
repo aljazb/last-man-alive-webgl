@@ -10,6 +10,8 @@ var radius = 3;
 var direction = 0;
 var zombies = [];
 var bullets = [];
+var holyDoor;
+var doorLife = 10;
 var groundX = 30;
 var groundZ = 25;
 var lastFireTime = Date.now();
@@ -154,10 +156,21 @@ function updateBullets() {
         bullets[i].position.x += norm_vector.x * bulletMoveSpeed;
         bullets[i].position.z += norm_vector.y * bulletMoveSpeed;
         if (Math.abs(bullets[i].position.x) > groundX/2 || Math.abs(bullets[i].position.z) > groundZ/2) {
+            bullets[i].dispose();
             bullets.splice(i, 1);
             i--;
             continue;
         }
+        if (bullets[i].intersectsMesh(holyDoor, false)) {
+                console.log("DELAAAA");
+                doorLife--;
+                bullets[i].dispose();
+                bullets.splice(i, 1);
+                i--;
+                if (doorLife <= 0) {
+                    holyDoor.dispose();
+                }
+            }
         for (var j = 0; j < zombies.length; j++) {
             if (bullets[i].intersectsMesh(zombies[j], false)) {
                 zombies[j].dispose();
@@ -254,12 +267,24 @@ function createScene() {
     var rightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
     rightWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
     rightWall.position = new BABYLON.Vector3(groundX/2, 1, 0);
-    var topWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    topWall.scaling = new BABYLON.Vector3(groundX, 2, 1);
-    topWall.position = new BABYLON.Vector3(0, 1, groundZ/2);
+    var topLeftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    topLeftWall.scaling = new BABYLON.Vector3(13, 2, 1);
+    topLeftWall.position = new BABYLON.Vector3(-9, 1, groundZ/2);
+    var topRightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    topRightWall.scaling = new BABYLON.Vector3(13, 2, 1);
+    topRightWall.position = new BABYLON.Vector3(9, 1, groundZ/2);
     var bottomWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    bottomWall.scaling = new BABYLON.Vector3(groundX, 2, 1);
+    bottomWall.scaling = new BABYLON.Vector3(groundX+1, 2, 1);
     bottomWall.position = new BABYLON.Vector3(0, 1, -groundZ/2);
+    
+    var door = BABYLON.Mesh.CreateBox("box", 1, scene);
+    door.scaling = new BABYLON.Vector3(5, 2, 1);
+    door.position = new BABYLON.Vector3(0, 1, groundZ/2);
+    var materialDoor = new BABYLON.StandardMaterial("texture1", scene);
+    materialDoor.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
+    door.material = materialDoor;
+    holyDoor = door;
+    holyDoor.checkCollisions = true;
 }
 
 function wait(ms){
