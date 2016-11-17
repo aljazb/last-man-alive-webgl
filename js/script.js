@@ -11,11 +11,13 @@ var direction = 0;
 var zombies = [];
 var bullets = [];
 var holyDoor;
-var doorLife = 10;
+var doorLife = 3;
 var groundX = 30;
 var groundZ = 25;
 var lastFireTime = Date.now();
 var lastZombieTime = Date.now();
+var doorsDestroyed = false;
+var waitFrames = 0;
 
 
 function main(){
@@ -136,14 +138,47 @@ function updateCharacter() {
             direction = 7;
         else if (keys.right)
             direction = 1;
-
+            
         character.position.z += tempMoveSpeed;
+        
         if (character.position.z > groundZ/2 - wallOffset) {
             character.position.z = groundZ/2 - wallOffset;
+            
+            if (doorsDestroyed && character.position.x > -2.5 && character.position.x < 2.5) {
+                wait(500);
+                engine.stopRenderLoop();
+                var body = document.getElementsByTagName('body')[0];
+                body.style.backgroundImage = 'url(textures/win_bg.jpg)';
+                document.getElementById("canvas").style.display = 'none';
+                document.getElementById("gameover").style.display = 'none';
+                document.getElementById("win").style.display = 'block';
+                
+            }
         }
     }
     
+    /*
+    console.log("Z: "+character.position.z);
+    console.log(groundZ/2);
+    console.log(doorsDestroyed);
     
+    // show winning screen
+    if (doorsDestroyed && character.position.x > -2.5 && character.position.x < 2.5 && character.position.z == (groundZ/2)-1) {
+        direction = 0;
+        character.position.z += tempMoveSpeed;
+        waitFrames++;
+        
+        if (waitFrames > 100) {
+            //wait(500);
+            engine.stopRenderLoop();
+            var body = document.getElementsByTagName('body')[0];
+            body.style.backgroundImage = 'url(textures/win_bg.jpg)';
+            document.getElementById("canvas").style.display = 'none';
+            document.getElementById("gameover").style.display = 'none';
+            document.getElementById("win").style.display = 'block';
+        }
+    }
+    */
     
     character.rotation.y = deg2rad(direction * 45);
 }
@@ -168,14 +203,7 @@ function updateBullets() {
             i--;
             if (doorLife <= 0) {
                 holyDoor.dispose();
-                
-                // show winning screen
-                engine.stopRenderLoop();
-                var body = document.getElementsByTagName('body')[0];
-                body.style.backgroundImage = 'url(textures/win_bg.png)';
-                document.getElementById("canvas").style.display = 'none';
-                document.getElementById("gameover").style.display = 'none';
-                document.getElementById("win").style.display = 'block';
+                doorsDestroyed = true;
             }
         }
         for (var j = 0; j < zombies.length; j++) {
@@ -193,8 +221,6 @@ function updateBullets() {
 
 function makeBullet() {
     if (keys.fire && Date.now() - lastFireTime > 500) {
-        console.log(direction);
-        
         lastFireTime = Date.now();
         
         var character_x = character.position.x;

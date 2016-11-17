@@ -7,7 +7,7 @@ html, body, canvas {
 }
 
 body {
-    background-image: url("textures/gameover_bg.png")
+    background-image: url("textures/gameover_bg.jpg")
 }
 
 canvas {
