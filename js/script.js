@@ -18,6 +18,7 @@ var lastFireTime = Date.now();
 var lastZombieTime = Date.now();
 var doorsDestroyed = false;
 var waitFrames = 0;
+var gunshot_sound, zombie_pain_sound, character_suffer_sound, hallelujah_sound, doors_shot_sound;
 
 
 function main(){
@@ -87,6 +88,8 @@ function updateZombies() {
         if (zombies[i].intersectsMesh(character, false)) {
             zombies[i].material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
             
+            character_suffer_sound.play();
+            
             // show gameover screen
             wait(1000);
             engine.stopRenderLoop();
@@ -144,15 +147,16 @@ function updateCharacter() {
         if (character.position.z > groundZ/2 - wallOffset) {
             character.position.z = groundZ/2 - wallOffset;
             
+            // show winning screen        
             if (doorsDestroyed && character.position.x > -2.5 && character.position.x < 2.5) {
-                wait(500);
+                hallelujah_sound.play();
+                wait(1000);
                 engine.stopRenderLoop();
                 var body = document.getElementsByTagName('body')[0];
                 body.style.backgroundImage = 'url(textures/win_bg.jpg)';
                 document.getElementById("canvas").style.display = 'none';
                 document.getElementById("gameover").style.display = 'none';
                 document.getElementById("win").style.display = 'block';
-                
             }
         }
     }
@@ -197,6 +201,8 @@ function updateBullets() {
             continue;
         }
         if (bullets[i].intersectsMesh(holyDoor, false)) {
+            doors_shot_sound.play();
+            
             doorLife--;
             bullets[i].dispose();
             bullets.splice(i, 1);
@@ -205,9 +211,12 @@ function updateBullets() {
                 holyDoor.dispose();
                 doorsDestroyed = true;
             }
+            continue;
         }
         for (var j = 0; j < zombies.length; j++) {
             if (bullets[i].intersectsMesh(zombies[j], false)) {
+                zombie_pain_sound.play();
+                
                 zombies[j].dispose();
                 bullets[i].dispose();
                 zombies.splice(j, 1);
@@ -220,8 +229,10 @@ function updateBullets() {
 }
 
 function makeBullet() {
-    if (keys.fire && Date.now() - lastFireTime > 500) {
+    if (keys.fire && Date.now() - lastFireTime > 1000) {
         lastFireTime = Date.now();
+        
+        gunshot_sound.play();
         
         var character_x = character.position.x;
         var character_z = character.position.z;
@@ -265,6 +276,8 @@ function createScene() {
     scene = new BABYLON.Scene(engine);
     scene.collisionsEnabled = true;
     
+    createMusic();
+    
     var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 30,-15), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
     light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(60,60,0), scene);
@@ -307,6 +320,15 @@ function createScene() {
     door.material = materialDoor;
     holyDoor = door;
     holyDoor.checkCollisions = true;
+}
+
+function createMusic() {
+    var ambient_music = new BABYLON.Sound("Ambient_music", "../sounds/creepy_music.mp3", scene, null, { loop: true, autoplay: true });
+    gunshot_sound = new BABYLON.Sound("Gunshot", "../sounds/gunshot.wav", scene);
+    zombie_pain_sound = new BABYLON.Sound("Zombie_pain", "../sounds/zombie_pain.wav", scene);
+    character_suffer_sound = new BABYLON.Sound("Character_sound", "../sounds/character_suffer.wav", scene);
+    hallelujah_sound = new BABYLON.Sound("Hallelujah", "../sounds/hallelujah.mp3", scene);
+    doors_shot_sound = new BABYLON.Sound("Doors_shot", "../sounds/doors_shot.wav", scene);
 }
 
 function wait(ms){
