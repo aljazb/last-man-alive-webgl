@@ -18,6 +18,7 @@ var lastFireTime = Date.now();
 var lastZombieTime = Date.now();
 var doorsDestroyed = false;
 var waitFrames = 0;
+var importedObjects = [];
 
 
 function main(){
@@ -307,6 +308,9 @@ function createScene() {
     door.material = materialDoor;
     holyDoor = door;
     holyDoor.checkCollisions = true;
+    
+    BABYLON.SceneLoader.ImportMesh("", "", "obzidje.babylon", scene, function (newMeshes, particleSystems) {
+    });
 }
 
 function wait(ms){
