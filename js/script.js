@@ -10,7 +10,9 @@ var radius = 3;
 var direction = 0;
 var zombies = [];
 var bullets = [];
-var holyDoor;
+var holyDoorLeft;
+var holyDoorRight;
+var fakeDoor;
 var doorLife = 3;
 var groundX = 30;
 var groundZ = 25;
@@ -191,19 +193,26 @@ function updateBullets() {
         var norm_vector = new BABYLON.Vector2(direction_x, direction_z).normalize();
         bullets[i].position.x += norm_vector.x * bulletMoveSpeed;
         bullets[i].position.z += norm_vector.y * bulletMoveSpeed;
-        if (Math.abs(bullets[i].position.x) > groundX/2 || Math.abs(bullets[i].position.z) > groundZ/2) {
+        if (Math.abs(bullets[i].position.x) > groundX/2 || Math.abs(bullets[i].position.z) > groundZ/2+2.8) {
             bullets[i].dispose();
             bullets.splice(i, 1);
             i--;
             continue;
         }
-        if (bullets[i].intersectsMesh(holyDoor, false)) {
+        if (bullets[i].intersectsMesh(fakeDoor, false) && !doorsDestroyed) {
             doorLife--;
             bullets[i].dispose();
             bullets.splice(i, 1);
             i--;
             if (doorLife <= 0) {
-                holyDoor.dispose();
+                fakeDoor.dispose();
+                holyDoorLeft.rotation.y = deg2rad(80);
+                holyDoorLeft.position.x -= 1;
+                holyDoorLeft.position.z -= 0.7;
+                
+                holyDoorRight.rotation.y = deg2rad(100);
+                holyDoorRight.position.x += 1;
+                holyDoorRight.position.z -= 0.7;
                 doorsDestroyed = true;
             }
         }
@@ -284,32 +293,33 @@ function createScene() {
     ground = BABYLON.Mesh.CreateGround('ground1', groundX, groundZ, 2, scene);
     ground.material = materialGround;
     
-    var leftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    leftWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
-    leftWall.position = new BABYLON.Vector3(-groundX/2, 1, 0);
-    var rightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    rightWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
-    rightWall.position = new BABYLON.Vector3(groundX/2, 1, 0);
-    var topLeftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    topLeftWall.scaling = new BABYLON.Vector3(13, 2, 1);
-    topLeftWall.position = new BABYLON.Vector3(-9, 1, groundZ/2);
-    var topRightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    topRightWall.scaling = new BABYLON.Vector3(13, 2, 1);
-    topRightWall.position = new BABYLON.Vector3(9, 1, groundZ/2);
-    var bottomWall = BABYLON.Mesh.CreateBox("box", 1, scene);
-    bottomWall.scaling = new BABYLON.Vector3(groundX+1, 2, 1);
-    bottomWall.position = new BABYLON.Vector3(0, 1, -groundZ/2);
+    // var leftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    // leftWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
+    // leftWall.position = new BABYLON.Vector3(-groundX/2, 1, 0);
+    // var rightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    // rightWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
+    // rightWall.position = new BABYLON.Vector3(groundX/2, 1, 0);
+    // var topLeftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    // topLeftWall.scaling = new BABYLON.Vector3(13, 2, 1);
+    // topLeftWall.position = new BABYLON.Vector3(-9, 1, groundZ/2);
+    // var topRightWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    // topRightWall.scaling = new BABYLON.Vector3(13, 2, 1);
+    // topRightWall.position = new BABYLON.Vector3(9, 1, groundZ/2);
+    // var bottomWall = BABYLON.Mesh.CreateBox("box", 1, scene);
+    // bottomWall.scaling = new BABYLON.Vector3(groundX+1, 2, 1);
+    // bottomWall.position = new BABYLON.Vector3(0, 1, -groundZ/2);
     
-    var door = BABYLON.Mesh.CreateBox("box", 1, scene);
-    door.scaling = new BABYLON.Vector3(5, 2, 1);
-    door.position = new BABYLON.Vector3(0, 1, groundZ/2);
-    var materialDoor = new BABYLON.StandardMaterial("texture1", scene);
-    materialDoor.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
-    door.material = materialDoor;
-    holyDoor = door;
-    holyDoor.checkCollisions = true;
+    // var materialDoor = new BABYLON.StandardMaterial("texture1", scene);
+    // materialDoor.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
+    // door.material = materialDoor;
+    fakeDoor = BABYLON.Mesh.CreateBox("box", 1, scene);
     
     BABYLON.SceneLoader.ImportMesh("", "", "obzidje.babylon", scene, function (newMeshes, particleSystems) {
+        holyDoorLeft = newMeshes[0];
+        holyDoorRight = newMeshes[5];
+        
+        fakeDoor.scaling = new BABYLON.Vector3(4, 1, 0.1);
+        fakeDoor.position = new BABYLON.Vector3(-0.5, 1, groundZ/2 + 0.75);
     });
 }
 
