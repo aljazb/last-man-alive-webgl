@@ -289,7 +289,7 @@ function createScene() {
     character.checkCollisions = true;
     
     var materialGround = new BABYLON.StandardMaterial("texture1", scene);
-    materialGround.diffuseTexture = new BABYLON.Texture("../textures/graveyard_grass.jpg", scene);
+    materialGround.diffuseTexture = new BABYLON.Texture("../textures/ground.png", scene);
     ground = BABYLON.Mesh.CreateGround('ground1', groundX, groundZ, 2, scene);
     ground.material = materialGround;
     
