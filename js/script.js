@@ -22,7 +22,10 @@ var doorsDestroyed = false;
 var waitFrames = 0;
 var redemption = false;
 var gunshot_sound, zombie_pain_sound, character_suffer_sound, hallelujah_sound, doors_shot_sound;
-var importedObjects = [];
+var zombie = [];
+var characterModels = [];
+var characterPositionX = 0;
+var characterPositionZ = 0;
 
 
 function main(){
@@ -48,8 +51,8 @@ function mouseClick() {
     var x = pickResult.pickedPoint.x;
     var z = pickResult.pickedPoint.z;
     
-    var character_x = character.position.x;
-    var character_z = character.position.z;
+    var character_x = characterPositionX;
+    var character_z = characterPositionZ;
     
     var distance_from_character = Math.sqrt(Math.pow(Math.abs(x-character_x), 2) + Math.pow(Math.abs(z-character_z), 2));
     
@@ -66,6 +69,11 @@ function mouseClick() {
         zombie.position.z = z;
         zombie.position.y = 0.5;
         zombies.push(zombie);
+        // BABYLON.SceneLoader.ImportMesh("", "", "zombie.babylon", scene, function (newMeshes, particleSystems) {
+        //     var zombieModels = newMeshes;
+        //     zombies.push(zombieModels);
+        // });
+        
     }
 }
 
@@ -81,8 +89,8 @@ function update() {
 }
 
 function updateZombies() {
-    var character_x = character.position.x;
-    var character_z = character.position.z;
+    var character_x = characterPositionX;
+    var character_z = characterPositionZ;
     for (var i=0; i<zombies.length; i++) {
         var vector = new BABYLON.Vector2(character_x - zombies[i].position.x, character_z - zombies[i].position.z);
         var norm_vector = vector.normalize();
@@ -113,16 +121,18 @@ function updateCharacter() {
     
     if (keys.left) {
         direction = 6;
-        character.position.x -= tempMoveSpeed;
-        if (character.position.x < -groundX/2 + wallOffset) {
-            character.position.x = -groundX/2 + wallOffset;
+        moveCharacter(-tempMoveSpeed, 0);
+        
+        if (characterModels[0].position.x < -groundX/2 + wallOffset) {
+            moveCharacterToPoint(-groundX/2 + wallOffset, characterModels[0].position.z);
         }
     } 
     else if (keys.right) {
         direction = 2;
-        character.position.x += tempMoveSpeed;
-        if (character.position.x > groundX/2 - wallOffset) {
-            character.position.x = groundX/2 - wallOffset;
+        moveCharacter(tempMoveSpeed, 0);
+        
+        if (characterModels[0].position.x > groundX/2 - wallOffset) {
+            moveCharacterToPoint(groundX/2 - wallOffset, characterModels[0].position.z);
         }
     }
     
@@ -133,9 +143,10 @@ function updateCharacter() {
         else if (keys.right)
             direction = 3;
 
-        character.position.z -= tempMoveSpeed;
-        if (character.position.z < -groundZ/2 + wallOffset) {
-            character.position.z = -groundZ/2 + wallOffset;
+        moveCharacter(0, -tempMoveSpeed);
+        
+        if (characterModels[0].position.z < -groundZ/2 + wallOffset * 2) {
+            moveCharacterToPoint(characterModels[0].position.x, -groundZ/2 + wallOffset * 2);
         }
     } 
     else if (keys.up) {
@@ -145,13 +156,14 @@ function updateCharacter() {
         else if (keys.right)
             direction = 1;
             
-        character.position.z += tempMoveSpeed;
         
-        if (character.position.z > groundZ/2 - wallOffset) {
-            character.position.z = groundZ/2 - wallOffset;
+        moveCharacter(0, tempMoveSpeed);
+        
+        if (characterModels[0].position.z > groundZ/2 - wallOffset) {
+            moveCharacterToPoint(characterModels[0].position.x, groundZ/2 - wallOffset);
             
             // show winning screen        
-            if (doorsDestroyed && character.position.x > -2.5 && character.position.x < 2.5) {
+            if (doorsDestroyed && characterModels[0].position.x > -2.5 && characterModels[0].position.x < 2.5) {
                 redemption = true;
                 hallelujah_sound.play();
             }
@@ -159,12 +171,33 @@ function updateCharacter() {
         }
     }
     
-    character.rotation.y = deg2rad(direction * 45);
+    if (characterModels[0]) {
+        characterPositionX = characterModels[0].position.x;
+        characterPositionZ = characterModels[0].position.z;
+    }
+    
+    for (var i = 0; i < characterModels.length; i++) {
+        characterModels[i].rotation.y = deg2rad(direction * 45 + 180);
+    }
+}
+
+function moveCharacter(x, z) {
+    for (var i = 0; i < characterModels.length; i++) {
+        characterModels[i].position.z += z;
+        characterModels[i].position.x += x;
+    }
+}
+
+function moveCharacterToPoint(x, z) {
+    for (var i = 0; i < characterModels.length; i++) {
+        characterModels[i].position.z = z;
+        characterModels[i].position.x = x;
+    }
 }
 
 function updateCharacterAfterRedemption() {
     if (waitFrames < 130) {
-        character.position.z += charMoveSpeed;
+        moveCharacter(0, charMoveSpeed);
     }
     else {
         wait(1000);
@@ -185,7 +218,7 @@ function updateBullets() {
         var norm_vector = new BABYLON.Vector2(direction_x, direction_z).normalize();
         bullets[i].position.x += norm_vector.x * bulletMoveSpeed;
         bullets[i].position.z += norm_vector.y * bulletMoveSpeed;
-        if (Math.abs(bullets[i].position.x) > groundX/2 || Math.abs(bullets[i].position.z) > groundZ/2+2.8) {
+        if (Math.abs(bullets[i].position.x) > groundX/2 || bullets[i].position.z > groundZ/2+2.8 || bullets[i].position.z < -groundZ/2) {
             bullets[i].dispose();
             bullets.splice(i, 1);
             i--;
@@ -231,8 +264,8 @@ function makeBullet() {
         
         gunshot_sound.play();
         
-        var character_x = character.position.x;
-        var character_z = character.position.z;
+        var character_x = characterModels[0].position.x;
+        var character_z = characterModels[0].position.z;
         
         var materialBullet = new BABYLON.StandardMaterial("texture1", scene);
         materialBullet.diffuseColor = new BABYLON.Color3(0.0, 1.0, 0.0);
@@ -242,7 +275,7 @@ function makeBullet() {
         
         bullet.position.x = character_x;
         bullet.position.z = character_z;
-        bullet.position.y = 0.5;
+        bullet.position.y = 2;
         bullet.direction = direction;
         
         bullets.push(bullet);
@@ -287,6 +320,7 @@ function createScene() {
     character.position.y = 0.5;
     character.rotation.x = deg2rad(90);
     character.checkCollisions = true;
+    character.scaling = new BABYLON.Vector3(0, 0, 0);
     
     var materialGround = new BABYLON.StandardMaterial("texture1", scene);
     materialGround.diffuseTexture = new BABYLON.Texture("../textures/ground.png", scene);
@@ -319,7 +353,11 @@ function createScene() {
         holyDoorRight = newMeshes[5];
         
         fakeDoor.scaling = new BABYLON.Vector3(4, 1, 0.1);
-        fakeDoor.position = new BABYLON.Vector3(-0.5, 1, groundZ/2 + 0.75);
+        fakeDoor.position = new BABYLON.Vector3(-0.5, 2, groundZ/2 + 0.75);
+    });
+    
+    BABYLON.SceneLoader.ImportMesh("", "", "character.babylon", scene, function (newMeshes, particleSystems) {
+       characterModels = newMeshes;
     });
 }
 
