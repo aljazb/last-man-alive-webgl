@@ -2,7 +2,7 @@ window.addEventListener('DOMContentLoaded', main);
 
 var keys = { left: false, right: false, up: false, down: false, fire: false };
 var vector_direction = { 0: [0,1], 1: [1,1], 2: [1,0], 3: [1,-1], 4: [0,-1], 5: [-1,-1], 6: [-1,0], 7: [-1,1]};
-var engine, scene, light, character, ground;
+var engine, scene, light, /*character,*/ ground;
 var charMoveSpeed = 0.05;
 var zombieMoveSpeed = 0.02;
 var bulletMoveSpeed = 0.2;
@@ -56,7 +56,10 @@ function mouseClick() {
     
     var distance_from_character = Math.sqrt(Math.pow(Math.abs(x-character_x), 2) + Math.pow(Math.abs(z-character_z), 2));
     
-    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 2000) {
+    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 1500) {
+        if (z < -groundZ/2 + 2.5 || z > groundZ/2 - 1.5 || x > groundX/2 - 1.5 || x < -groundX/2 + 1.5) {
+            return;
+        }
         lastZombieTime = Date.now();
         
         var materialZombie = new BABYLON.StandardMaterial("texture1", scene);
@@ -169,7 +172,6 @@ function updateCharacter() {
         else if (keys.right)
             direction = 1;
             
-        
         moveCharacter(0, tempMoveSpeed);
         
         if (characterModels[0].position.z > groundZ/2 - wallOffset) {
@@ -245,7 +247,7 @@ function updateBullets() {
         var norm_vector = new BABYLON.Vector2(direction_x, direction_z).normalize();
         bullets[i].position.x += norm_vector.x * bulletMoveSpeed;
         bullets[i].position.z += norm_vector.y * bulletMoveSpeed;
-        if (Math.abs(bullets[i].position.x) > groundX/2 || bullets[i].position.z > groundZ/2+2.8 || bullets[i].position.z < -groundZ/2) {
+        if (Math.abs(bullets[i].position.x) > groundX/2 || bullets[i].position.z > groundZ/2+2 || bullets[i].position.z < -groundZ/2+0.5) {
             bullets[i].dispose();
             bullets.splice(i, 1);
             i--;
@@ -297,13 +299,18 @@ function makeBullet() {
         var character_z = characterModels[0].position.z;
         
         var materialBullet = new BABYLON.StandardMaterial("texture1", scene);
-        materialBullet.diffuseColor = new BABYLON.Color3(0.0, 1.0, 0.0);
+        materialBullet.diffuseColor = new BABYLON.Color3(0.6, 0.0, 0.0);
 
         var bullet  = BABYLON.Mesh.CreateSphere('bullet', 0, 0.3, scene);
         bullet.material = materialBullet;
         
-        bullet.position.x = character_x;
-        bullet.position.z = character_z;
+        var tempBulletOffsetX = 0;
+        var tempBulletOffsetZ = 1;
+        var bulletOffsetX = -tempBulletOffsetZ * Math.sin(deg2rad(direction * 45));
+        var bulletOffsetZ = tempBulletOffsetZ * Math.cos(deg2rad(direction * 45));
+        
+        bullet.position.x = character_x - bulletOffsetX;
+        bullet.position.z = character_z + bulletOffsetZ;
         bullet.position.y = 2;
         bullet.direction = direction;
         
@@ -341,19 +348,21 @@ function createScene() {
     camera.setTarget(BABYLON.Vector3.Zero());
     light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(60,60,0), scene);
     
-    var materialCharacter = new BABYLON.StandardMaterial("texture1", scene);
-    materialCharacter.diffuseColor = new BABYLON.Color3(0.0, 0.5, 1.0);
-    character = BABYLON.MeshBuilder.CreateCylinder("cone", {diameterTop: 0, tessellation: 10}, scene);
-    character.material = materialCharacter;
-    character.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
-    character.position.y = 0.5;
-    character.rotation.x = deg2rad(90);
-    character.checkCollisions = true;
-    character.scaling = new BABYLON.Vector3(0, 0, 0);
+    // var materialCharacter = new BABYLON.StandardMaterial("texture1", scene);
+    // materialCharacter.diffuseColor = new BABYLON.Color3(0.0, 0.5, 1.0);
+    // character = BABYLON.MeshBuilder.CreateCylinder("cone", {diameterTop: 0, tessellation: 10}, scene);
+    // character.material = materialCharacter;
+    // character.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+    // character.position.y = 0.5;
+    // character.rotation.x = deg2rad(90);
+    // character.checkCollisions = true;
+    // character.scaling = new BABYLON.Vector3(0, 0, 0);
     
     var materialGround = new BABYLON.StandardMaterial("texture1", scene);
     materialGround.diffuseTexture = new BABYLON.Texture("../textures/ground.png", scene);
-    ground = BABYLON.Mesh.CreateGround('ground1', groundX, groundZ, 2, scene);
+    ground = BABYLON.Mesh.CreateGround('ground1', groundX-2, groundZ-2, 2, scene);
+    ground.position.x -= 0.3;
+    ground.position.z += 0.2;
     ground.material = materialGround;
     
     // var leftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
