@@ -12,7 +12,6 @@ var zombies = [];
 var bullets = [];
 var holyDoorLeft;
 var holyDoorRight;
-var fakeDoor;
 var doorLife = 10;
 var groundX = 30;
 var groundZ = 25;
@@ -253,14 +252,13 @@ function updateBullets() {
             i--;
             continue;
         }
-        if (!doorsDestroyed && bullets[i].intersectsMesh(fakeDoor, false)) {
+        if (!doorsDestroyed && (bullets[i].intersectsMesh(holyDoorLeft, false) || bullets[i].intersectsMesh(holyDoorRight, false))) {
             doors_shot_sound.play();
             doorLife--;
             bullets[i].dispose();
             bullets.splice(i, 1);
             i--;
             if (doorLife <= 0) {
-                fakeDoor.dispose();
                 holyDoorLeft.rotation.y = deg2rad(80);
                 holyDoorLeft.position.x -= 1;
                 holyDoorLeft.position.z -= 0.7;
@@ -384,14 +382,12 @@ function createScene() {
     // var materialDoor = new BABYLON.StandardMaterial("texture1", scene);
     // materialDoor.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
     // door.material = materialDoor;
-    fakeDoor = BABYLON.Mesh.CreateBox("box", 1, scene);
     
     BABYLON.SceneLoader.ImportMesh("", "", "obzidje.babylon", scene, function (newMeshes, particleSystems) {
         holyDoorLeft = newMeshes[0];
         holyDoorRight = newMeshes[5];
-        
-        fakeDoor.scaling = new BABYLON.Vector3(4, 1, 0.1);
-        fakeDoor.position = new BABYLON.Vector3(-0.5, 2, groundZ/2 + 0.75);
+        holyDoorLeft.collisionsEnabled = true;
+        holyDoorRight.collisionsEnabled = true;
     });
     
     BABYLON.SceneLoader.ImportMesh("", "", "character.babylon", scene, function (newMeshes, particleSystems) {
