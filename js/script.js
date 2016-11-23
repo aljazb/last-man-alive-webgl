@@ -345,6 +345,7 @@ function createScene() {
     var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 30,-15), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
     light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(60,60,0), scene);
+    light.specular = new BABYLON.Color3(0.5, 0.5, 0.5);
     
     // var materialCharacter = new BABYLON.StandardMaterial("texture1", scene);
     // materialCharacter.diffuseColor = new BABYLON.Color3(0.0, 0.5, 1.0);
@@ -356,12 +357,20 @@ function createScene() {
     // character.checkCollisions = true;
     // character.scaling = new BABYLON.Vector3(0, 0, 0);
     
+    var materialGrass = new BABYLON.StandardMaterial("texture1", scene);
+    materialGrass.diffuseTexture = new BABYLON.Texture("../textures/grass.jpg", scene);
+    var grass = BABYLON.Mesh.CreatePlane("plane", 100.0, scene, false, BABYLON.Mesh.DEFAULTSIDE);
+    grass.rotation.x += deg2rad(90);
+    grass.position.y -= 10;
+    grass.material = materialGrass;
+    
     var materialGround = new BABYLON.StandardMaterial("texture1", scene);
     materialGround.diffuseTexture = new BABYLON.Texture("../textures/ground.png", scene);
     ground = BABYLON.Mesh.CreateGround('ground1', groundX-2, groundZ-2, 2, scene);
+    ground.material = materialGround;
     ground.position.x -= 0.3;
     ground.position.z += 0.2;
-    ground.material = materialGround;
+    
     
     // var leftWall = BABYLON.Mesh.CreateBox("box", 1, scene);
     // leftWall.scaling = new BABYLON.Vector3(1, 2, groundZ);
