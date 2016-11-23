@@ -57,14 +57,15 @@ function mouseClick() {
         lastZombieTime = Date.now();
         
         var materialZombie = new BABYLON.StandardMaterial("texture1", scene);
-        materialZombie.diffuseColor = new BABYLON.Color3(0.0, 0.0, 0.0);
+        materialZombie.diffuseColor = new BABYLON.Color3(0.0, 0.5, 0.0);
         
-        var zombie  = BABYLON.Mesh.CreateSphere('zombie', 0, 0.5, scene);
+        var zombie = BABYLON.MeshBuilder.CreateCylinder("cone", {diameterTop: 0, tessellation: 5}, scene);
         zombie.checkCollisions = true;
         zombie.material = materialZombie;
         zombie.position.x = x;
         zombie.position.z = z;
         zombie.position.y = 0.5;
+        zombie.rotation.x = deg2rad(90);
         zombies.push(zombie);
     }
 }
@@ -86,8 +87,13 @@ function updateZombies() {
     for (var i=0; i<zombies.length; i++) {
         var vector = new BABYLON.Vector2(character_x - zombies[i].position.x, character_z - zombies[i].position.z);
         var norm_vector = vector.normalize();
+        
         zombies[i].position.x += norm_vector.x * zombieMoveSpeed;
         zombies[i].position.z += norm_vector.y * zombieMoveSpeed;
+        
+        var angle = Math.atan2(norm_vector.x, norm_vector.y);
+        zombies[i].rotation.y = angle;
+        
         if (zombies[i].intersectsMesh(character, false)) {
             zombies[i].material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
             
