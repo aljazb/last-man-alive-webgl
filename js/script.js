@@ -13,7 +13,7 @@ var bullets = [];
 var holyDoorLeft;
 var holyDoorRight;
 var fakeDoor;
-var doorLife = 3;
+var doorLife = 10;
 var groundX = 30;
 var groundZ = 25;
 var lastFireTime = Date.now();
@@ -56,24 +56,29 @@ function mouseClick() {
     
     var distance_from_character = Math.sqrt(Math.pow(Math.abs(x-character_x), 2) + Math.pow(Math.abs(z-character_z), 2));
     
-    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 1000) {
+    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 2000) {
         lastZombieTime = Date.now();
         
         var materialZombie = new BABYLON.StandardMaterial("texture1", scene);
         materialZombie.diffuseColor = new BABYLON.Color3(0.0, 0.5, 0.0);
         
-        var zombie = BABYLON.MeshBuilder.CreateCylinder("cone", {diameterTop: 0, tessellation: 5}, scene);
-        zombie.checkCollisions = true;
-        zombie.material = materialZombie;
-        zombie.position.x = x;
-        zombie.position.z = z;
-        zombie.position.y = 0.5;
-        zombie.rotation.x = deg2rad(90);
-        zombies.push(zombie);
-        // BABYLON.SceneLoader.ImportMesh("", "", "zombie.babylon", scene, function (newMeshes, particleSystems) {
-        //     var zombieModels = newMeshes;
-        //     zombies.push(zombieModels);
-        // });
+        // var zombie = BABYLON.MeshBuilder.CreateCylinder("cone", {diameterTop: 0, tessellation: 5}, scene);
+        // zombie.checkCollisions = true;
+        // zombie.material = materialZombie;
+        // zombie.position.x = x;
+        // zombie.position.z = z;
+        // zombie.position.y = 0.5;
+        // zombie.rotation.x = deg2rad(90);
+        // zombies.push(zombie);
+        BABYLON.SceneLoader.ImportMesh("", "", "zombie.babylon", scene, function (newMeshes, particleSystems) {
+            for (var i = 0; i < newMeshes.length; i++) {
+                newMeshes[i].position.x = x;
+                newMeshes[i].position.z = z;
+                newMeshes[i].checkCollisions = true;
+            }
+            
+            zombies.push(newMeshes);
+        });
         
     }
 }
@@ -93,17 +98,19 @@ function updateZombies() {
     var character_x = characterPositionX;
     var character_z = characterPositionZ;
     for (var i=0; i<zombies.length; i++) {
-        var vector = new BABYLON.Vector2(character_x - zombies[i].position.x, character_z - zombies[i].position.z);
+        var vector = new BABYLON.Vector2(character_x - zombies[i][0].position.x, character_z - zombies[i][0].position.z);
         var norm_vector = vector.normalize();
         
-        zombies[i].position.x += norm_vector.x * zombieMoveSpeed;
-        zombies[i].position.z += norm_vector.y * zombieMoveSpeed;
+        if (zombies[i]) {
+            moveZombie(i, norm_vector.x * zombieMoveSpeed, norm_vector.y * zombieMoveSpeed);
+        }
         
         var angle = Math.atan2(norm_vector.x, norm_vector.y);
-        zombies[i].rotation.y = angle;
+        for (var j = 0; j < zombies[i].length; j++) {
+            zombies[i][j].rotation.y = angle + deg2rad(180);
+        }
         
-        if (zombies[i].intersectsMesh(character, false)) {
-            zombies[i].material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+        if (zombies[i][0].intersectsMesh(characterModels[0], false)) {
             
             character_suffer_sound.play();
             
@@ -201,6 +208,20 @@ function moveCharacterToPoint(x, z) {
     }
 }
 
+function moveZombie(index, x, z) {
+    for (var i = 0; i < zombies[index].length; i++) {
+        zombies[index][i].position.z += z;
+        zombies[index][i].position.x += x;
+    }
+}
+
+function moveZombieToPoint(index, x, z) {
+    for (var i = 0; i < zombies[index].length; i++) {
+        zombies[index][i].position.z = z;
+        zombies[index][i].position.x = x;
+    }
+}
+
 function updateCharacterAfterRedemption() {
     if (waitFrames < 130) {
         moveCharacter(0, charMoveSpeed);
@@ -250,10 +271,12 @@ function updateBullets() {
             continue;
         }
         for (var j = 0; j < zombies.length; j++) {
-            if (bullets[i].intersectsMesh(zombies[j], false)) {
+            if (bullets[i].intersectsMesh(zombies[j][0], false)) {
                 zombie_pain_sound.play();
                 
-                zombies[j].dispose();
+                for (var k = 0; k < zombies[j].length; k++) {
+                    zombies[j][k].dispose();
+                }
                 bullets[i].dispose();
                 zombies.splice(j, 1);
                 bullets.splice(i, 1);
@@ -364,6 +387,9 @@ function createScene() {
     
     BABYLON.SceneLoader.ImportMesh("", "", "character.babylon", scene, function (newMeshes, particleSystems) {
        characterModels = newMeshes;
+       for (var i = 0; i < newMeshes.length; i++) {
+            characterModels[i].checkCollisions = true;
+       }
     });
 }
 
