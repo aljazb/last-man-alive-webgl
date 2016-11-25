@@ -55,7 +55,7 @@ function mouseClick() {
     
     var distance_from_character = Math.sqrt(Math.pow(Math.abs(x-character_x), 2) + Math.pow(Math.abs(z-character_z), 2));
     
-    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 1500) {
+    if (pickResult.hit && distance_from_character > radius && Date.now() - lastZombieTime > 1000) {
         if (z < -groundZ/2 + 2.5 || z > groundZ/2 - 1.5 || x > groundX/2 - 1.5 || x < -groundX/2 + 1.5) {
             return;
         }
@@ -288,7 +288,7 @@ function updateBullets() {
 }
 
 function makeBullet() {
-    if (keys.fire && Date.now() - lastFireTime > 1000) {
+    if (keys.fire && Date.now() - lastFireTime > 700) {
         lastFireTime = Date.now();
         
         gunshot_sound.play();
@@ -404,6 +404,8 @@ function createScene() {
        for (var i = 0; i < newMeshes.length; i++) {
             characterModels[i].checkCollisions = true;
        }
+       
+       moveCharacter(11, -9);
     });
 }
 
